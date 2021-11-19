@@ -43,14 +43,30 @@ func IndexDocument(input string) {
 
 func Search(input string) []interface{} {
 	tokens := Tokenize(input)
-	indexedTokens := make([]interface{}, 0)
+	indexedResults := make([]Tuple, 0)
 
 	for _, token := range tokens {
-		indexToken, _ := index.Get(token)
-		indexedTokens = append(indexedTokens, indexToken)
+		indexedTokenDocs, _ := index.Get(token)
+
+		for _, indexedTokenDoc := range indexedTokenDocs.([]Tuple) {
+			indexedDocIdx := IndexedDocIndex(indexedResults, indexedTokenDoc.id.(string))
+			if indexedDocIdx >= 0 {
+				oldContent := indexedResults[indexedDocIdx]
+				indexedResults[indexedDocIdx] = Tuple{ id: oldContent.id, occurrencies: oldContent.occurrencies.(int) + 1}
+			} else {
+				indexedResults = append(indexedResults, indexedTokenDoc)
+			}
+		}
 	}
 
-	return indexedTokens
+	var indexedDocs = make([]interface{}, 0)
+
+	for _, result := range indexedResults {
+		document, _ := docs.Get(result.id)
+		indexedDocs = append(indexedDocs, document)
+	}
+
+	return indexedDocs
 }
 
 func main() {
@@ -59,13 +75,9 @@ func main() {
 	IndexDocument("So here I won't way my name. Sorry.")
 	IndexDocument("I'm indexing this. Hello world.")
 
-	searchResults := Search("hello world")
+	searchResult := Search("hello world")
 
-	for _, wordResult := range searchResults {
-		for _, doc := range wordResult.([]Tuple) {
-			document, _ := docs.Get(doc.id)
-
-			fmt.Println(document)
-		}
+	for _, result := range searchResult {
+		fmt.Println(result)
 	}
 }
