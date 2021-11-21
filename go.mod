@@ -1,4 +1,4 @@
-module github.com/micheleriva/lepus
+module github.com/micheleriva/gosearch
 
 go 1.14
 

@@ -1,5 +1,5 @@
 CMD=go
-OUTPUT=lepus
+OUTPUT=gosearch
 BUILD=$(CMD) build
 GOARCH=386
 
@@ -16,7 +16,7 @@ clean:
 	$(CMD) -rf ./bin
 
 compile:
-	$(CMD) build -o bin/lepus .
+	$(CMD) build -o bin/gosearch .
 
 compile-all:
 	echo "Compiling for every OS and Platform"
