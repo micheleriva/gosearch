@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/cornelk/hashmap"
 	"github.com/gofrs/uuid"
+	"github.com/micheleriva/lepus/tokenizer"
 )
 
 type Tuple struct {
@@ -20,8 +21,8 @@ func init() {
 
 func IndexDocument(input string) {
 	id := uuid.Must(uuid.NewV4()).String()
-	tokenized := Tokenize(input)
-	countedTokens := CountTokens(tokenized)
+	tokenized := tokenizer.Tokenize(input)
+	countedTokens := tokenizer.CountTokens(tokenized)
 
 	for k, v := range countedTokens {
 		values, exists := index.Get(k)
@@ -42,7 +43,7 @@ func IndexDocument(input string) {
 }
 
 func Search(input string) []interface{} {
-	tokens := Tokenize(input)
+	tokens := tokenizer.Tokenize(input)
 	indexedResults := make([]Tuple, 0)
 
 	for _, token := range tokens {
