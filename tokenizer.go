@@ -1,4 +1,4 @@
-package tokenizer
+package main
 
 import (
 	"log"

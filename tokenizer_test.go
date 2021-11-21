@@ -1,4 +1,4 @@
-package tokenizer
+package main
 
 import (
 	"reflect"
@@ -19,15 +19,15 @@ func TestTokenize(t *testing.T) {
 
 	cases := []TokenizeTest{
 		{
-			test: Tokenize("hello, world!"),
+			test:   Tokenize("hello, world!"),
 			expect: []string{"hello", "world"},
 		},
 		{
-			test: Tokenize("Lorem ipsum. Dolor? Sit amet!"),
+			test:   Tokenize("Lorem ipsum. Dolor? Sit amet!"),
 			expect: []string{"lorem", "ipsum", "dolor", "sit", "amet"},
 		},
 		{
-			test: Tokenize(""),
+			test:   Tokenize(""),
 			expect: []string{},
 		},
 	}
@@ -42,11 +42,11 @@ func TestTokenize(t *testing.T) {
 func TestCountTokens(t *testing.T) {
 	cases := []CountTokensTest{
 		{
-			test: CountTokens([]string{"hello", "world"}),
+			test:   CountTokens([]string{"hello", "world"}),
 			expect: map[string]int{"world": 1, "hello": 1},
 		},
 		{
-			test: CountTokens([]string{"this", "is", "duplicated", "duplicated", "is"}),
+			test:   CountTokens([]string{"this", "is", "duplicated", "duplicated", "is"}),
 			expect: map[string]int{"duplicated": 2, "is": 2, "this": 1},
 		},
 	}

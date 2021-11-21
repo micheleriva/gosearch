@@ -1,17 +1,25 @@
+CMD=go
+OUTPUT=lepus
+BUILD=$(CMD) build
+GOARCH=386
+
 run:
-	go run .
+	$(CMD) run .
+
+deps:
+	$(CMD) mod download
 
 test:
-	go test .
+	$(CMD) test .
 
 clean:
-	rm -rf ./bin
+	$(CMD) -rf ./bin
 
 compile:
-	go build -o bin/lepus .
+	$(CMD) build -o bin/lepus .
 
 compile-all:
 	echo "Compiling for every OS and Platform"
-	GOOS=freebsd GOARCH=386 go build -o bin/lepus-freebsd-386 .
-	GOOS=linux GOARCH=386 go build -o bin/lepus-linux-386 .
-	GOOS=windows GOARCH=386 go build -o bin/lepus-windows-386 .
+	GOOS=freebsd GOARCH=$(GOARCH) $(BUILD) -o bin/$(OUTPUT)-freebsd-$(GOARCH) .
+	GOOS=linux GOARCH=$(GOARCH) $(BUILD) -o bin/$(OUTPUT)-linux-$(GOARCH) .
+	GOOS=windows GOARCH=$(GOARCH) $(BUILD) -o bin/$(OUTPUT)-windows-$(GOARCH) .
