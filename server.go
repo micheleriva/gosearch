@@ -6,7 +6,11 @@ import (
 )
 
 type PostDataV1 struct {
-	content string `json:"content" binding:"required"`
+	Content string `json:"content" binding:"required"`
+}
+
+type SearchDataV1 struct {
+	Q string `form:"q" binding:"required"`
 }
 
 func RunServer() {
@@ -25,22 +29,38 @@ func pingController(c *gin.Context) {
 
 func insertDocControllerV1(c *gin.Context) {
 	var postParams PostDataV1
-	c.BindJSON(&postParams)
+	err := c.BindJSON(&postParams)
 
-	result := IndexDocument(postParams.content)
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(500, gin.H{
+			"error": "an error occurred",
+		})
+		return
+	}
+
+	result := IndexDocument(postParams.Content)
 	c.JSON(200, gin.H{
 		"id": result.Id,
 	})
 }
 
 func searchControllerV1(c *gin.Context) {
-	searchQuery, _ := c.GetQuery("q")
+	var query SearchDataV1
+	err := c.Bind(&query)
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(500, gin.H{
+			"error": "an error occurred",
+		})
+		return
+	}
 
-	result := Search(searchQuery)
+	result := Search(query.Q)
 
-	fmt.Println(result)
+	fmt.Println(query.Q)
 
 	c.JSON(200, gin.H{
-		"docs": nil,
+		"docs": result,
 	})
 }
