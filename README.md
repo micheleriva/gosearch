@@ -13,8 +13,8 @@ I just wanted to learn how to write a search engine from scratch without any pri
 - [x] Search content REST API
 - [ ] Delete content
 - [ ] Delete content REST API
-- [ ] Update content
-- [ ] Update content REST API
+- [X] Update content
+- [X] Update content REST API
 
 ## REST API
 

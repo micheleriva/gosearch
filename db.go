@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/cornelk/hashmap"
 	"github.com/gofrs/uuid"
 )
@@ -11,7 +12,7 @@ type IndexedDoc struct {
 }
 
 type IndexContent struct {
-	Id string
+	Token string
 	Occurrences int
 }
 
@@ -23,8 +24,10 @@ func init() {
 	docs = &hashmap.HashMap{}
 }
 
-func IndexDocument(input string) IndexedDoc {
-	id := uuid.Must(uuid.NewV4()).String()
+func IndexDocument(input string, id string) IndexedDoc {
+	if id == "" {
+		id = uuid.Must(uuid.NewV4()).String()
+	}
 	tokenized := Tokenize(input)
 	countedTokens := CountTokens(tokenized)
 
@@ -51,7 +54,31 @@ func IndexDocument(input string) IndexedDoc {
 	}
 }
 
-func Search(input string) []interface{} {
+func UpdateDocument(id string, newContent string) error {
+	oldContent, ok := docs.Get(id)
+
+	if !ok {
+		return fmt.Errorf("document with id %s does not exist", id)
+	}
+
+	oldTokens := Tokenize(oldContent.(string))
+
+	for _, token := range oldTokens {
+		indexedToken, ok := index.Get(token)
+		if !ok {
+			return fmt.Errorf("unable to update document with id %s. token does %s not exist", id, indexedToken)
+		}
+
+		index.Set(token, RemoveToken(indexedToken.([]IndexContent), token))
+	}
+
+	docs.Del(id)
+	IndexDocument(newContent, id)
+
+	return nil
+}
+
+func Search(input string) []string {
 	tokens := Tokenize(input)
 	indexedResults := make([]IndexContent, 0)
 
@@ -59,21 +86,22 @@ func Search(input string) []interface{} {
 		indexedTokenDocs, _ := index.Get(token)
 
 		for _, indexedTokenDoc := range indexedTokenDocs.([]IndexContent) {
-			indexedDocIdx := IndexedDocIndex(indexedResults, indexedTokenDoc.Id)
+			indexedDocIdx := IndexedDocIndex(indexedResults, indexedTokenDoc.Token)
 			if indexedDocIdx >= 0 {
 				oldContent := indexedResults[indexedDocIdx]
-				indexedResults[indexedDocIdx] = IndexContent{ Id: oldContent.Id, Occurrences: oldContent.Occurrences + 1}
+				indexedResults[indexedDocIdx] = IndexContent{ Token: oldContent.Token, Occurrences: oldContent.Occurrences + 1}
 			} else {
 				indexedResults = append(indexedResults, indexedTokenDoc)
 			}
 		}
 	}
 
-	var indexedDocs = make([]interface{}, 0)
+	var indexedDocs = make([]string, 0)
 
 	for _, result := range indexedResults {
-		document, _ := docs.Get(result.Id)
-		indexedDocs = append(indexedDocs, document)
+		document, _ := docs.Get(result.Token)
+
+		indexedDocs = append(indexedDocs, document.(string))
 	}
 
 	return indexedDocs
