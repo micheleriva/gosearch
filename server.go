@@ -18,11 +18,16 @@ type UpdateDataV1 struct {
 	Content string `json:"content" binding:"required"`
 }
 
+type DeleteDataV1 struct {
+	ID string `json:"id" binding:"required"`
+}
+
 func RunServer() {
 	r := gin.Default()
 	r.GET("/ping", pingController)
 	r.POST("/v1/insert", insertDocControllerV1)
 	r.PUT("/v1/update", updateDocControllerV1)
+	r.DELETE("/v1/delete", deleteDocControllerV1)
 	r.GET("/v1/search", searchControllerV1)
 	r.Run()
 }
@@ -91,5 +96,30 @@ func updateDocControllerV1(c *gin.Context) {
 
 	c.JSON(200, gin.H{
 		"result": fmt.Sprintf("Document %s updated successfully", data.ID),
+	})
+}
+
+func deleteDocControllerV1(c *gin.Context) {
+	var data DeleteDataV1
+	err := c.Bind(&data)
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(500, gin.H{
+			"error": "an error occurred",
+		})
+		return
+	}
+
+	deleteError := DeleteDocument(data.ID)
+	if deleteError != nil {
+		fmt.Println(err)
+		c.JSON(500, gin.H{
+			"error": "an error occurred",
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"result": fmt.Sprintf("Document %s deleted successfully", data.ID),
 	})
 }

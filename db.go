@@ -55,6 +55,17 @@ func IndexDocument(input string, id string) IndexedDoc {
 }
 
 func UpdateDocument(id string, newContent string) error {
+	err := DeleteDocument(id)
+	if err != nil {
+		fmt.Println(err)
+		return fmt.Errorf("unable to delete document %s", id)
+	}
+	IndexDocument(newContent, id)
+
+	return nil
+}
+
+func DeleteDocument(id string) error {
 	oldContent, ok := docs.Get(id)
 
 	if !ok {
@@ -73,7 +84,6 @@ func UpdateDocument(id string, newContent string) error {
 	}
 
 	docs.Del(id)
-	IndexDocument(newContent, id)
 
 	return nil
 }
@@ -97,6 +107,10 @@ func Search(input string) []string {
 	}
 
 	var indexedDocs = make([]string, 0)
+
+	if len(indexedResults) == 0 || indexedResults == nil {
+		return []string{}
+	}
 
 	for _, result := range indexedResults {
 		document, _ := docs.Get(result.Token)
